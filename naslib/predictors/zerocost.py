@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class ZeroCost(Predictor):
-    def __init__(self, method_type="jacov"):
+    def __init__(self, method_type="jacov", proxy_kwargs=None):
         # available zero-cost method types: 'jacov', 'snip', 'synflow', 'grad_norm', 'fisher', 'grasp'
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
@@ -23,6 +23,7 @@ class ZeroCost(Predictor):
         self.dataload = "random"
         self.num_imgs_or_batches = 1
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.proxy_kwargs = proxy_kwargs if proxy_kwargs is not None else {}
 
     def query(self, graph, dataloader=None, info=None):
         loss_fn = graph.get_loss_fn()
@@ -35,6 +36,7 @@ class ZeroCost(Predictor):
                 device=self.device,
                 loss_fn=loss_fn,
                 measure_names=[self.method_type],
+                **self.proxy_kwargs
             )
 
         if math.isnan(score) or math.isinf(score):

@@ -10,6 +10,30 @@ from naslib.utils.get_dataset_api import get_dataset_api, load_sampled_architect
 from naslib.utils.logging import setup_logger
 from naslib.utils import utils
 
+
+def is_disconnected(net_str):
+    ids = [int(i) for i in net_str.strip('()').split(',')]
+    conv_ids = {2, 3}
+    zero = 1
+
+    edge_map = ((1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4))
+    edge_map = {val: i for i, val in enumerate(edge_map)}
+
+    def edge(i, j):
+        return ids[edge_map[(i, j)]]
+
+    # convolution is not connected to the output
+    case_1 = (edge(3, 4) == zero) and (edge(2, 3) in conv_ids or edge(1, 3) in conv_ids)
+    case_2 = (edge(1, 2) in conv_ids) and edge(2, 4) == zero and edge(3, 4) == zero
+    case_3 = (edge(1, 2) in conv_ids) and edge(2, 4) == zero and edge(2, 3) == zero
+
+    # convolution does not get any inputs
+    case_4 = (edge(1, 2) == zero) and (edge(2, 3) in conv_ids or edge(2, 4) in conv_ids)
+    case_5 = edge(1, 3) == zero and edge(2, 3) == zero and (edge(3, 4) in conv_ids)
+    case_6 = edge(1, 2) == zero and edge(1, 3) == zero and (edge(3, 4) in conv_ids)
+    return any([case_1, case_2, case_3, case_4, case_5, case_6])
+
+
 def translate_str(s, replace_str='[]', with_str='()'):
     table = str.maketrans(replace_str, with_str)
     return str.translate(s, table)
@@ -32,18 +56,25 @@ else:
     postfix = ''
 
 archs = load_sampled_architectures(config.search_space, postfix)
-end_index = config.start_idx + config.n_models if config.start_idx + config.n_models < len(archs) else len(archs)
+end_index = (config.start_idx + config.n_models) if config.start_idx + config.n_models < len(archs) else len(archs)
 archs_to_evaluate = {idx: eval(archs[str(idx)]) for idx in range(config.start_idx, end_index)}
 
 utils.set_seed(config.seed)
 train_loader, _, _, _, _ = utils.get_train_val_loaders(config)
 
-predictor = ZeroCost(method_type=config.predictor)
+config.normalize = config.normalize if hasattr(config, 'normalize') else 'no_norm'
+config.relu = config.relu if hasattr(config, 'relu') else 'no_relu'
+kwargs = {'normalize': config.normalize != 'no_norm', 'div_by_relu': config.relu != 'no_relu'}
+predictor = ZeroCost(method_type=config.predictor, proxy_kwargs=kwargs)
 
 zc_scores = []
 
 for i, (idx, arch) in enumerate(archs_to_evaluate.items()):
     try:
+        #if not is_disconnected(str(arch)):
+        #    logger.info(f"{i} \tSkipping model id {idx} with encoding {arch}")
+        #    continue
+
         logger.info(f'{i} \tComputing ZC score for model id {idx} with encoding {arch}')
         zc_score = {}
         graph = search_space.clone()
@@ -73,7 +104,7 @@ for i, (idx, arch) in enumerate(archs_to_evaluate.items()):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        output_file = os.path.join(output_dir, f'benchmark--{config.search_space}--{config.dataset}--{config.start_idx}.json')
+        output_file = os.path.join(output_dir, f'benchmark--{config.normalize}--{config.relu}--{config.search_space}--{config.dataset}--{config.start_idx}.json')
 
         with open(output_file, 'w') as f:
             json.dump(zc_scores, f)
