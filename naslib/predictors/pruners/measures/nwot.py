@@ -47,6 +47,9 @@ def compute_nwot(net, inputs, targets, split_data=1, loss_fn=None, normalize=Fal
 
                 
     def counting_backward_hook(module, inp, out):
+        if out[0] is None or inp[0] is None:
+            return
+
         all_zero = torch.eq(out[0], 0.0).all() or torch.eq(inp[0], 0.0).all()
         #print(all_zero)
         if not all_zero:
