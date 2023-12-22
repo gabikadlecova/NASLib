@@ -300,6 +300,9 @@ def main(args):
                 "fidelity_list": fidelity_list,
                 "max_hpo_time": args.max_hpo_time,
             }
+            if args.predictor == "graph_features":
+                config["zc_root_path"] = args.graph_features_path
+                config["graph_features_config_path"] = args.graph_features_config_path
 
             with open(folder + f"/config_{args.predictor}_{i}.yaml", "w") as fh:
                 yaml.dump(config, fh)
@@ -455,6 +458,14 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--zerocost", type=str, default='none', help="ZeroCost proxy source"
+    )
+
+    parser.add_argument(
+        "--graph_features_path", type=str, help="Path to zc_combine repo"
+    )
+
+    parser.add_argument(
+        "--graph_features_config_path", type=str, help="Path to graph features config."
     )
     
     args = parser.parse_args()

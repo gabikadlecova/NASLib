@@ -4,7 +4,8 @@ lcsvr omni_ngb omni_seminas \
 bananas bonas gcn mlp nao seminas \
 lgb ngb rf xgb \
 bayes_lin_reg bohamiann dngo \
-gp sparse_gp var_sparse_gp)
+gp sparse_gp var_sparse_gp \
+graph_features)
 
 experiment_types=(single single single single single single \
 vary_fidelity vary_fidelity vary_fidelity vary_fidelity vary_fidelity vary_fidelity \
@@ -12,7 +13,8 @@ vary_both vary_both vary_both \
 vary_train_size vary_train_size vary_train_size vary_train_size vary_train_size vary_train_size \
 vary_train_size vary_train_size vary_train_size vary_train_size \
 vary_train_size vary_train_size vary_train_size \
-vary_train_size vary_train_size vary_train_size)
+vary_train_size vary_train_size vary_train_size \
+vary_train_size)
 
 start_seed=$1
 if [ -z "$start_seed" ]
@@ -40,9 +42,17 @@ for i in $(seq 0 $((${#predictors[@]}-1)) )
 do
     predictor=${predictors[$i]}
     experiment_type=${experiment_types[$i]}
+
+    if [ "$predictor" == graph_features ]; then
+        graph_pred_args="--graph_features_config_path $2 --graph_features_path $3"
+    fi
+
     python $base_file/benchmarks/create_configs.py --predictor $predictor --experiment_type $experiment_type \
     --test_size $test_size --start_seed $start_seed --trials $trials --out_dir $out_dir \
-    --dataset=$dataset --config_type predictor --search_space $search_space
+    --dataset=$dataset --config_type predictor --search_space $search_space \
+    $graph_pred_args
+
+
 done
 
 # run experiments

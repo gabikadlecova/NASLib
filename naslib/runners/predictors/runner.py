@@ -1,6 +1,7 @@
 import logging
 
 from naslib.defaults.predictor_evaluator import PredictorEvaluator
+from naslib.predictors.graph_features import GraphFeaturesPredictor
 from naslib.utils.encodings import EncodingType
 
 from naslib.predictors import (
@@ -68,6 +69,7 @@ supported_predictors = {
         h="auto",
     ),
     "grad_norm": ZeroCost(method_type="grad_norm"),
+    "graph_features": GraphFeaturesPredictor(config),
     "grasp": ZeroCost(method_type="grasp"),
     "jacov": ZeroCost(method_type="jacov"),
     "lce": LCEPredictor(metric=Metric.VAL_ACCURACY),
