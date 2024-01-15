@@ -476,6 +476,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--graph_features_config_path", type=str, help="Path to graph features config."
     )
+
+    parser.add_argument(
+        "--valid_networks", type=str, help="Path to nets with reachable branches only"
+    )
     
     args = parser.parse_args()
 
