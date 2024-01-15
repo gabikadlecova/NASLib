@@ -31,7 +31,7 @@ search_space=nasbench201
 dataset=cifar10
 
 # other variables:
-trials=100
+trials=$5
 end_seed=$(($start_seed + $trials - 1))
 test_size=200
 

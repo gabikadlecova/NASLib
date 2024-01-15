@@ -183,8 +183,8 @@ if __name__ == "__main__":
     parser.add_argument("--config_type", type=str, default='nas', help="nas or predictor?")
     parser.add_argument("--search_space", type=str, default='nasbench201', help="nasbench201 or darts?")
     parser.add_argument("--experiment_type", type=str, default='single', help="type of experiment")
-    parser.add_argument("--graph_features_path", type=str, help="Path to zc_combine repo")
-    parser.add_argument("--graph_features_config_path", type=str, help="Path to graph features config.")
+    parser.add_argument("--graph_features_model", type=str, help="Path to zc_combine repo")
+    parser.add_argument("--graph_features_pickle_path", type=str, help="Path to graph features pickle.")
     parser.add_argument("--valid_networks", type=str, help="Path to nets with reachable branches only")
 
     args = parser.parse_args()
