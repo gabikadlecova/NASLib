@@ -1,6 +1,7 @@
 import json
 
 import numpy as np
+from naslib.predictors.trees.ngb import loguniform
 from zc_combine.predictors import predictor_cls
 
 from naslib.predictors import Predictor
@@ -14,7 +15,7 @@ def replace_path_root(cfg_dict, root_path, root_str="<ROOT>"):
 
 
 class GraphFeaturesPredictor(Predictor):
-    def __init__(self, config):
+    def __init__(self, config, hpo_wrapper=False):
         super().__init__()
 
         cgf_path = config.graph_features_config_path
@@ -28,6 +29,8 @@ class GraphFeaturesPredictor(Predictor):
         self.bench_name = f"zc_{config.search_space}"
         self.dataset = config.dataset
         self.init_dataset()
+
+        self.hpo_wrapper = hpo_wrapper
 
     def init_dataset(self):
         if 'cache_dir' in self.cfg:
@@ -62,3 +65,32 @@ class GraphFeaturesPredictor(Predictor):
     def query(self, xtest, info=None):
         x, y_dataset = self.get_features_for_net(xtest)
         return self.model.predict(x)
+
+    @property
+    def inital_hyperparams(self):
+        # NOTE: Copied from NB301
+        params = {
+            "n_estimators": 116,
+            "max_features": 0.17055852159745608,
+            "min_samples_leaf": 2,
+            "min_samples_split": 2,
+            "bootstrap": False,
+            #'verbose': -1
+        }
+        return params
+
+    def set_random_hyperparams(self):
+        if self.hyperparams is None:
+            # evaluate the default config first during HPO
+            params = self.inital_hyperparams.copy()
+        else:
+            params = {
+                "n_estimators": int(loguniform(16, 128)),
+                "max_features": loguniform(0.1, 0.9),
+                "min_samples_leaf": int(np.random.choice(19) + 1),
+                "min_samples_split": int(np.random.choice(18) + 2),
+                "bootstrap": False,
+                #'verbose': -1
+            }
+        self.hyperparams = params
+        return params

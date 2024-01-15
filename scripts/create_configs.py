@@ -299,10 +299,19 @@ def main(args):
                 "fidelity_single": args.fidelity_single,
                 "fidelity_list": fidelity_list,
                 "max_hpo_time": args.max_hpo_time,
+                "search": {
+                    "batch_size": 256,
+                    "data_size": 25000,
+                    "cutout": False,
+                    "cutout_length": 16,
+                    "cutout_prob": 1.0,
+                    "train_portion": 0.7
+                },
+                "hparams_from_file": "predictor_hpo_configs/hpo_config_1.json"
             }
-            if args.predictor == "graph_features":
-                config["zc_root_path"] = args.graph_features_path
-                config["graph_features_config_path"] = args.graph_features_config_path
+            config["zc_root_path"] = args.graph_features_path
+            config["graph_features_config_path"] = args.graph_features_config_path
+            config["valid_networks"] = args.valid_networks
 
             with open(folder + f"/config_{args.predictor}_{i}.yaml", "w") as fh:
                 yaml.dump(config, fh)

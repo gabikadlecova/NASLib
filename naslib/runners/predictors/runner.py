@@ -70,6 +70,7 @@ supported_predictors = {
     ),
     "grad_norm": ZeroCost(method_type="grad_norm"),
     "graph_features": GraphFeaturesPredictor(config),
+    "graph_features_tune": GraphFeaturesPredictor(config, hpo_wrapper=True),
     "grasp": ZeroCost(method_type="grasp"),
     "jacov": ZeroCost(method_type="jacov"),
     "lce": LCEPredictor(metric=Metric.VAL_ACCURACY),
