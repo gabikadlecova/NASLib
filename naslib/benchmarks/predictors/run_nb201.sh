@@ -41,9 +41,9 @@ do
     predictor=${predictors[$i]}
     experiment_type=${experiment_types[$i]}
 
-    graph_pred_args="--graph_features_config_path $2 --graph_features_path $3 --valid_networks $4"
+    graph_pred_args="--graph_features_pickle_path $2 --graph_features_model $3 --valid_networks $4"
 
-    python $base_file/benchmarks/create_configs.py --predictor $predictor --experiment_type $experiment_type \
+    python create_configs.py --predictor $predictor --experiment_type $experiment_type \
     --test_size $test_size --start_seed $start_seed --trials $trials --out_dir $out_dir \
     --dataset=$dataset --config_type predictor --search_space $search_space \
     $graph_pred_args
@@ -57,6 +57,6 @@ do
     do
         config_file=$out_dir/$dataset/configs/predictors/config\_$predictor\_$t.yaml
         echo ================running $predictor trial: $t =====================
-        python ../naslib/runners/predictors/runner.py --config-file $config_file
+        python predictors/runner.py --config-file $config_file
     done
 done

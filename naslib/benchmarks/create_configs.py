@@ -112,8 +112,8 @@ def main(args):
                 'fidelity_list': fidelity_list,
                 'max_hpo_time': 900
             }
-            config["zc_root_path"] = args.graph_features_path
-            config["graph_features_config_path"] = args.graph_features_config_path
+            config["graph_features_model"] = args.graph_features_model
+            config["graph_features_pickle_path"] = args.graph_features_pickle_path
             config["valid_networks"] = args.valid_networks
 
             with open(folder + f'/config_{args.predictor}_{i}.yaml', 'w') as fh:
