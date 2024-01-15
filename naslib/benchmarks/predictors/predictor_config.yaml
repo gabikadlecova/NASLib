@@ -17,6 +17,10 @@ train_size_single: 50
 fidelity_list: [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190]
 fidelity_single: 5
 
+# graph_features_config_path: graph_features_configs/test.json
+# zc_root_path: .../zc_combine/
+# valid_networks: .../nb201_valid_nets.csv
+
 # Used by Jacobian_cov from NAS without training from DARTS for data loader
 search:
   seed: 1000

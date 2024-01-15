@@ -3,6 +3,7 @@ import time
 import json
 import logging
 import os
+import pandas as pd
 import numpy as np
 import copy
 import torch
@@ -41,6 +42,10 @@ class PredictorEvaluator(object):
         self.mutate_pool = 10
         self.num_arches_to_mutate = 5
         self.max_mutation_rate = 3
+
+        self.valid_networks = None
+        if hasattr(config, 'valid_networks'):
+            self.valid_networks = set(pd.read_csv(config.valid_networks)['net'].tolist())
 
         self.dataset = config.dataset
         self.metric = Metric.VAL_ACCURACY
@@ -106,8 +111,15 @@ class PredictorEvaluator(object):
                     info_dict[hp] = arch.query(Metric.HP, dataset=self.dataset, 
                                                dataset_api=self.dataset_api)[hp]
         return accuracy, train_time, info_dict
-            
-    def load_dataset(self, load_labeled=False, data_size=10, arch_hash_map={}):
+
+    def is_hash_valid(self, arch_hash):
+        arch_hash = str(arch_hash)
+        if self.valid_networks is None:
+            return True
+
+        return arch_hash in self.valid_networks
+
+    def load_dataset(self, load_labeled=False, data_size=10, arch_hash_map=None):
         """
         There are two ways to load an architecture.
         load_labeled=False: sample a random architecture from the search space.
@@ -119,6 +131,7 @@ class PredictorEvaluator(object):
         After we load an architecture, query the final val accuracy.
         If the predictor requires extra info such as partial learning curve info, query that too.
         """
+        arch_hash_map = {} if arch_hash_map is None else arch_hash_map
         xdata = []
         ydata = []
         info = []
@@ -132,7 +145,7 @@ class PredictorEvaluator(object):
                 arch.load_labeled_architecture(dataset_api=self.dataset_api)
             
             arch_hash = arch.get_hash()
-            if arch_hash in arch_hash_map:
+            if not self.is_hash_valid(arch_hash) or arch_hash in arch_hash_map:
                 continue
             else:
                 arch_hash_map[arch_hash] = True
@@ -145,12 +158,13 @@ class PredictorEvaluator(object):
 
         return [xdata, ydata, info, train_times], arch_hash_map
 
-    def load_mutated_test(self, data_size=10, arch_hash_map={}):
+    def load_mutated_test(self, data_size=10, arch_hash_map=None):
         """
         Load a test set not uniformly at random, but by picking some random
         architectures and then mutation the best ones. This better emulates
         distributions in local or mutation-based NAS algorithms.
         """
+        arch_hash_map = {} if arch_hash_map is None else arch_hash_map
         assert self.load_labeled == False, 'Mutation is only implemented for load_labeled = False'
         xdata = []
         ydata = []
@@ -162,10 +176,12 @@ class PredictorEvaluator(object):
             arch = self.search_space.clone()
             arch.sample_random_architecture(dataset_api=self.dataset_api)
             arch_hash = arch.get_hash()
-            if arch_hash in arch_hash_map:
+
+            if not self.is_hash_valid(arch_hash) or arch_hash in arch_hash_map:
                 continue
             else:
                 arch_hash_map[arch_hash] = True
+
             accuracy, train_time, info_dict = self.get_full_arch_info(arch)
             xdata.append(arch)
             ydata.append(accuracy)
@@ -202,14 +218,16 @@ class PredictorEvaluator(object):
 
         return [xdata, ydata, info, train_times], arch_hash_map
     
-    def load_mutated_train(self, data_size=10, arch_hash_map={}, 
-                           test_data=[]):
+    def load_mutated_train(self, data_size=10, arch_hash_map=None, test_data=None):
         """
         Load a training set not uniformly at random, but by picking architectures
         from the test set and mutating the best ones. There is still no overlap
         between the training and test sets. This better emulates local or
         mutation-based NAS algorithms.
         """
+        arch_hash_map = {} if arch_hash_map is None else arch_hash_map
+        test_data = [] if test_data is None else test_data
+
         assert self.load_labeled == False, 'Mutation is only implemented for load_labeled = False'
         xdata = []
         ydata = []
@@ -222,7 +240,7 @@ class PredictorEvaluator(object):
             arch = self.search_space.clone()
             arch.mutate(parent, dataset_api=self.dataset_api)
             arch_hash = arch.get_hash()
-            if arch_hash in arch_hash_map:
+            if not self.is_hash_valid(arch_hash) or arch_hash in arch_hash_map:
                 continue
             else:
                 arch_hash_map[arch_hash] = True

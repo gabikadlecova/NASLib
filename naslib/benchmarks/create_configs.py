@@ -110,8 +110,11 @@ def main(args):
                 'train_size_single': args.train_size_single,
                 'fidelity_single': args.fidelity_single,
                 'fidelity_list': fidelity_list,
-                'max_hpo_time': 900,
+                'max_hpo_time': 900
             }
+            config["zc_root_path"] = args.graph_features_path
+            config["graph_features_config_path"] = args.graph_features_config_path
+            config["valid_networks"] = args.valid_networks
 
             with open(folder + f'/config_{args.predictor}_{i}.yaml', 'w') as fh:
                 yaml.dump(config, fh)
@@ -180,6 +183,9 @@ if __name__ == "__main__":
     parser.add_argument("--config_type", type=str, default='nas', help="nas or predictor?")
     parser.add_argument("--search_space", type=str, default='nasbench201', help="nasbench201 or darts?")
     parser.add_argument("--experiment_type", type=str, default='single', help="type of experiment")
+    parser.add_argument("--graph_features_path", type=str, help="Path to zc_combine repo")
+    parser.add_argument("--graph_features_config_path", type=str, help="Path to graph features config.")
+    parser.add_argument("--valid_networks", type=str, help="Path to nets with reachable branches only")
 
     args = parser.parse_args()
 
