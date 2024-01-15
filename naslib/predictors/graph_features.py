@@ -1,4 +1,5 @@
 import json
+import pickle
 
 import numpy as np
 from naslib.predictors.trees.ngb import loguniform
@@ -48,6 +49,10 @@ class GraphFeaturesPredictor(Predictor):
         self.net_map = {nets.loc[i]: i for i in nets.index}
         self.dataset = dataset
         self.y = y
+
+    def save_dataset(self, out_path):
+        with open(out_path, 'wb') as f:
+            pickle.dump((self.net_map, self.dataset, self.y), f)
 
     def get_features_for_net(self, x_arch):
         hashes = [str(arch.get_hash()) for arch in x_arch]
