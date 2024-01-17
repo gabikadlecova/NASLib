@@ -1,13 +1,10 @@
 ConfigSpace
 cython
-hyperopt==0.1.2
+hyperopt
 pyyaml
-numpy==1.16.4
 torch>=1.2.0
 torchvision>=0.4.0
 fvcore
-matplotlib
-pandas
 pytest
 pytest-cov
 codecov
