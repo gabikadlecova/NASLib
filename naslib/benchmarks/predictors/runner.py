@@ -43,6 +43,8 @@ supported_predictors = {
     'grad_norm': ZeroCostV2(config, batch_size=64, method_type='grad_norm'),
     "graph_features": GraphFeaturesPredictor(config),
     "graph_features_tune": GraphFeaturesPredictor(config, hpo_wrapper=True),
+    "graph_features_xgb": GraphFeaturesPredictor(config, model='xgb'),
+    "graph_features_xgb_tune": GraphFeaturesPredictor(config, model='xgb', hpo_wrapper=True),
     'grasp': ZeroCostV2(config, batch_size=64, method_type='grasp'),
     'jacov': ZeroCostV1(config, batch_size=64, method_type='jacov'),
     'lce': LCEPredictor(metric=Metric.VAL_ACCURACY),

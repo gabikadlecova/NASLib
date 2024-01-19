@@ -15,7 +15,7 @@ def replace_path_root(cfg_dict, root_path, root_str="<ROOT>"):
 
 
 class GraphFeaturesPredictor(Predictor):
-    def __init__(self, config, hpo_wrapper=False):
+    def __init__(self, config, model='rf', hpo_wrapper=False):
         super().__init__()
 
         feature_path = config.graph_features_pickle_path
@@ -23,7 +23,9 @@ class GraphFeaturesPredictor(Predictor):
             data = pickle.load(f)
             self.net_map, self.dataset, self.y = data
 
-        self.model = predictor_cls[config.graph_features_model](config.seed)
+        self.dataset.drop(columns='net', inplace=True)
+
+        self.model = predictor_cls[model](config.seed)
         self.bench_name = f"zc_{config.search_space}"
 
         self.hpo_wrapper = hpo_wrapper

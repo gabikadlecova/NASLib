@@ -185,7 +185,7 @@ if __name__ == "__main__":
     parser.add_argument("--experiment_type", type=str, default='single', help="type of experiment")
     parser.add_argument("--graph_features_model", type=str, help="Path to zc_combine repo")
     parser.add_argument("--graph_features_pickle_path", type=str, help="Path to graph features pickle.")
-    parser.add_argument("--valid_networks", type=str, help="Path to nets with reachable branches only"
+    parser.add_argument("--valid_networks", type=str, help="Path to nets with reachable branches only",
                         default=None)
 
     args = parser.parse_args()

@@ -5,7 +5,7 @@ bananas bonas gcn mlp nao seminas \
 lgb ngb rf xgb \
 bayes_lin_reg bohamiann dngo \
 gp sparse_gp var_sparse_gp \
-graph_features)
+graph_features graph_features_xgb graph_features_tune graph_features_xgb_tune)
 
 experiment_types=(single single single single single single \
 vary_fidelity vary_fidelity vary_fidelity vary_fidelity vary_fidelity vary_fidelity \
@@ -14,7 +14,7 @@ vary_train_size vary_train_size vary_train_size vary_train_size vary_train_size 
 vary_train_size vary_train_size vary_train_size vary_train_size \
 vary_train_size vary_train_size vary_train_size \
 vary_train_size vary_train_size vary_train_size \
-vary_train_size)
+vary_train_size vary_train_size vary_train_size vary_train_size)
 
 start_seed=$1
 if [ -z "$start_seed" ]
@@ -23,14 +23,14 @@ then
 fi
 
 # folders:
-out_dir=runs
+out_dir=runs_darts
 
 # search space / data:
 search_space=darts
 dataset=cifar10
 
 # other variables:
-trials=1
+trials=$4
 end_seed=$(($start_seed + $trials - 1))
 test_size=100
 
@@ -40,10 +40,16 @@ do
     predictor=${predictors[$i]}
     experiment_type=${experiment_types[$i]}
 
-    # valid networks here are nb301 nets
-    graph_pred_args="--graph_features_pickle_path $2 --graph_features_model $3 --valid_networks $4"
+    if [[ $5 ]]; then
+         if [ $predictor != $5 ]; then
+             continue;
+         fi
+    fi
 
-    python $base_file/benchmarks/create_configs.py --predictor $predictor --experiment_type $experiment_type \
+    # valid networks here are nb301 nets
+    graph_pred_args="--graph_features_pickle_path $2 --valid_networks $3"
+
+    python create_configs.py --predictor $predictor --experiment_type $experiment_type \
     --test_size $test_size --start_seed $start_seed --trials $trials --out_dir $out_dir \
     --dataset=$dataset --config_type predictor --search_space $search_space \
     $graph_pred_args
@@ -54,6 +60,11 @@ for t in $(seq $start_seed $end_seed)
 do
     for predictor in ${predictors[@]}
     do
+        if [[ $5 ]]; then
+             if [ $predictor != $5 ]; then
+                 continue;
+             fi
+        fi
         config_file=$out_dir/$dataset/configs/predictors/config\_$predictor\_$t.yaml
         echo ================running $predictor trial: $t =====================
         python predictors/runner.py --config-file $config_file

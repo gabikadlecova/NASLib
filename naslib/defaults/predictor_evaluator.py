@@ -44,7 +44,7 @@ class PredictorEvaluator(object):
         self.max_mutation_rate = 3
 
         self.valid_networks = None
-        if hasattr(config, 'valid_networks'):
+        if hasattr(config, 'valid_networks') and config.valid_networks is not None:
             self.valid_networks = set(pd.read_csv(config.valid_networks)['net'].tolist())
 
         self.dataset = config.dataset
