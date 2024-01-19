@@ -157,6 +157,7 @@ class NasBench101SearchSpace(Graph):
 
     def set_hash(self, hash):
         spec = convert_tuple_to_spec(hash)
+        self.hash_not_padded = hash
         spec = pad_spec(spec)
         self.set_spec(spec)
 

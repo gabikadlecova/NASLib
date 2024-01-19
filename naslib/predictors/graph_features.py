@@ -32,7 +32,12 @@ class GraphFeaturesPredictor(Predictor):
         self.hpo_wrapper = hpo_wrapper
 
     def get_features_for_net(self, x_arch):
-        hashes = [str(arch.get_hash()) for arch in x_arch]
+        # ugly hack for padded vs not padded issues (nb101) in old NASLib version
+        if hasattr(x_arch[0], 'hash_not_padded'):
+            hashes = [str(arch.hash_not_padded) for arch in x_arch]
+        else:
+            hashes = [str(arch.get_hash()) for arch in x_arch]
+
         indices = [self.net_map[h] for h in hashes]
         return self.dataset.loc[indices], self.y.loc[indices]
 
