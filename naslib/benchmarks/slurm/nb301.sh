@@ -32,8 +32,8 @@ start=`date +%s`
 
 BASE_DIR="/home/kadlecog/kadlecog-kadlecog-features/predictors_NASLib/naslib/benchmarks"
 
-bash $BASE_DIR/predictors/run_nb101.sh $1 $BASE_DIR/saved_features/nasbench101-cifar10.pickle \
-    $BASE_DIR/../../../zc_combine/data/nb101_nets.csv $2 $3
+bash $BASE_DIR/predictors/run_darts.sh $1 $BASE_DIR/saved_features/nasbench301-cifar10.pickle
+    $BASE_DIR/../../../zc_combine/data/nb301_nets.csv $2 $3
 
 end=`date +%s`
 runtime=$((end-start))
