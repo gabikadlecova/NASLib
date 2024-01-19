@@ -478,7 +478,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--valid_networks", type=str, help="Path to nets with reachable branches only"
+        "--valid_networks", type=str, help="Path to nets with reachable branches only", default=None
     )
     
     args = parser.parse_args()

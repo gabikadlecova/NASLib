@@ -43,9 +43,10 @@ class GraphFeaturesPredictor(Predictor):
                                                                          kwargs.get('version_key', None),
                                                                          True)
 
-        nets, dataset, y = load_feature_proxy_dataset(self.cfg['searchspace_path'], self.bench_name, self.dataset,
+        data, dataset, y = load_feature_proxy_dataset(self.cfg['searchspace_path'], self.bench_name, self.dataset,
                                                       **self.cfg['kwargs'])
 
+        nets = data['nets']
         self.net_map = {nets.loc[i]: i for i in nets.index}
         self.dataset = dataset
         self.y = y
