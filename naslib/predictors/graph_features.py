@@ -25,6 +25,7 @@ class GraphFeaturesPredictor(Predictor):
 
         self.dataset.drop(columns='net', inplace=True)
 
+        self.model_name = model
         self.model = predictor_cls[model](config.seed)
         self.bench_name = f"zc_{config.search_space}"
 
@@ -49,15 +50,30 @@ class GraphFeaturesPredictor(Predictor):
 
     @property
     def inital_hyperparams(self):
-        # NOTE: Copied from NB301
-        params = {
-            "n_estimators": 116,
-            "max_features": 0.17055852159745608,
-            "min_samples_leaf": 2,
-            "min_samples_split": 2,
-            "bootstrap": False,
-            #'verbose': -1
-        }
+        if self.model == 'rf':
+            # NOTE: Copied from NB301
+            params = {
+                "n_estimators": 116,
+                "max_features": 0.17055852159745608,
+                "min_samples_leaf": 2,
+                "min_samples_split": 2,
+                "bootstrap": False,
+                #'verbose': -1
+            }
+        elif self.model == 'xgb':
+            params = {
+                'objective': 'reg:squarederror',
+                'eval_metric': "rmse",
+                'booster': 'gbtree',
+                'max_depth': 6,
+                'min_child_weight': 1,
+                'colsample_bytree': 1,
+                'learning_rate': .3,
+                'colsample_bylevel': 1
+            }
+        else:
+            raise ValueError("Invalid model for hyperparams")
+
         return params
 
     def set_random_hyperparams(self):
@@ -65,13 +81,31 @@ class GraphFeaturesPredictor(Predictor):
             # evaluate the default config first during HPO
             params = self.inital_hyperparams.copy()
         else:
-            params = {
-                "n_estimators": int(loguniform(16, 128)),
-                "max_features": loguniform(0.1, 0.9),
-                "min_samples_leaf": int(np.random.choice(19) + 1),
-                "min_samples_split": int(np.random.choice(18) + 2),
-                "bootstrap": False,
-                #'verbose': -1
-            }
+            if self.model == 'rf':
+                params = {
+                    "n_estimators": int(loguniform(16, 128)),
+                    "max_features": loguniform(0.1, 0.9),
+                    "min_samples_leaf": int(np.random.choice(19) + 1),
+                    "min_samples_split": int(np.random.choice(18) + 2),
+                    "bootstrap": False,
+                    #'verbose': -1
+                }
+            elif self.model == 'xgb':
+                params = {
+                    'objective': 'reg:squarederror',
+                    'eval_metric': "rmse",
+                    # 'early_stopping_rounds': 100,
+                    'booster': 'gbtree',
+                    'max_depth': int(np.random.choice(range(1, 15))),
+                    'min_child_weight': int(np.random.choice(range(1, 10))),
+                    'colsample_bytree': np.random.uniform(.0, 1.0),
+                    'learning_rate': loguniform(.001, .5),
+                    # 'alpha': 0.24167936088332426,
+                    # 'lambda': 31.393252465064943,
+                    'colsample_bylevel': np.random.uniform(.0, 1.0),
+                }
+            else:
+                raise ValueError("Invalid model for hyperparams")
+
         self.hyperparams = params
         return params
