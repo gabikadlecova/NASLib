@@ -1,4 +1,5 @@
 import codecs
+import random
 import time
 import json
 import logging
@@ -37,7 +38,11 @@ class PredictorEvaluator(object):
         self.fidelity_list = config.fidelity_list
         self.uniform_random = config.uniform_random
         self.max_hpo_time = config.max_hpo_time
-        
+
+        self.sample_from_valids = False
+        if hasattr(config, 'sample_from_valids') and config.sample_from_valids is not None:
+            self.sample_from_valids = config.sample_from_valids
+
         # mutation parameters
         self.mutate_pool = 10
         self.num_arches_to_mutate = 5
@@ -45,7 +50,8 @@ class PredictorEvaluator(object):
 
         self.valid_networks = None
         if hasattr(config, 'valid_networks') and config.valid_networks is not None:
-            self.valid_networks = set(pd.read_csv(config.valid_networks)['net'].tolist())
+            self.valid_networks = pd.read_csv(config.valid_networks)['net'].tolist()
+            self.valid_networks = self.valid_networks if self.sample_from_valids else set(self.valid_networks)
 
         self.dataset = config.dataset
         self.metric = Metric.VAL_ACCURACY
@@ -112,12 +118,21 @@ class PredictorEvaluator(object):
                                                dataset_api=self.dataset_api)[hp]
         return accuracy, train_time, info_dict
 
-    def is_hash_valid(self, arch_hash):
+    def is_hash_valid(self, arch_hash, just_sampled=False):
+        if just_sampled and self.sample_from_valids:
+            return True
+
         arch_hash = str(arch_hash)
         if self.valid_networks is None:
             return True
 
         return arch_hash in self.valid_networks
+
+    def sample_valid_arch(self):
+        arch = self.search_space.clone()
+        arch_hash = random.choice(self.valid_networks)
+        arch.set_hash(eval(arch_hash))
+        return arch
 
     def load_dataset(self, load_labeled=False, data_size=10, arch_hash_map=None):
         """
@@ -137,15 +152,18 @@ class PredictorEvaluator(object):
         info = []
         train_times = []
         while len(xdata) < data_size:
-            if not load_labeled:
-                arch = self.search_space.clone()
-                arch.sample_random_architecture(dataset_api=self.dataset_api)
+            if self.sample_from_valids:
+                arch = self.sample_valid_arch()
             else:
-                arch = self.search_space.clone()
-                arch.load_labeled_architecture(dataset_api=self.dataset_api)
+                if not load_labeled:
+                    arch = self.search_space.clone()
+                    arch.sample_random_architecture(dataset_api=self.dataset_api)
+                else:
+                    arch = self.search_space.clone()
+                    arch.load_labeled_architecture(dataset_api=self.dataset_api)
             
             arch_hash = arch.get_hash()
-            if not self.is_hash_valid(arch_hash) or arch_hash in arch_hash_map:
+            if not self.is_hash_valid(arch_hash, just_sampled=True) or arch_hash in arch_hash_map:
                 continue
             else:
                 arch_hash_map[arch_hash] = True
@@ -177,7 +195,7 @@ class PredictorEvaluator(object):
             arch.sample_random_architecture(dataset_api=self.dataset_api)
             arch_hash = arch.get_hash()
 
-            if not self.is_hash_valid(arch_hash) or arch_hash in arch_hash_map:
+            if arch_hash in arch_hash_map:
                 continue
             else:
                 arch_hash_map[arch_hash] = True

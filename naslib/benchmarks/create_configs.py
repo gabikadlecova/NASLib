@@ -115,6 +115,7 @@ def main(args):
             config["graph_features_model"] = args.graph_features_model
             config["graph_features_pickle_path"] = args.graph_features_pickle_path
             config["valid_networks"] = args.valid_networks
+            config["sample_from_valids"] = args.search_space in ['nasbench101', 'darts']
 
             with open(folder + f'/config_{args.predictor}_{i}.yaml', 'w') as fh:
                 yaml.dump(config, fh)

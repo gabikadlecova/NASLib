@@ -366,6 +366,9 @@ class DartsSearchSpace(Graph):
         self.compact = compact
         convert_compact_to_naslib(compact, self)
 
+    def set_hash(self, hash):
+        self.set_compact(hash)
+
     def sample_random_architecture(self, dataset_api=None):
         """
         This will sample a random architecture and update the edges in the

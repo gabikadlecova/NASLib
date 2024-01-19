@@ -1,7 +1,7 @@
 
 # experiment types: single, vary_train_size, vary_fidelity
 experiment_type: single
-search_space: nasbench201
+search_space: nasbench101
 predictor: bananas
 test_size: 100
 uniform_random: 1
@@ -17,9 +17,10 @@ train_size_single: 50
 fidelity_list: [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190]
 fidelity_single: 5
 
-graph_features_pickle_path: ""
+sample_from_valids: True
+graph_features_pickle_path: "../../../../../zc_combine/data/nasbench101-cifar10.pickle"
 graph_features_model: rf
-valid_networks: ""
+valid_networks: "../../../../../zc_combine/data/nb101_nets.csv"
 
 # Used by Jacobian_cov from NAS without training from DARTS for data loader
 search:

@@ -47,3 +47,25 @@ def convert_spec_to_tuple(spec):
     ops = [op_dict.index(s) for s in spec['ops']]
     tup = tuple([*matrix, *ops])
     return tup
+
+
+def convert_tuple_to_spec(tup):
+    op_dict = ['input', 'output', 'maxpool3x3', 'conv1x1-bn-relu', 'conv3x3-bn-relu']
+    l = len(tup)
+    # l = n*n + n
+    n = int(-0.5 + np.sqrt(1 + 4 * l) / 2)
+    matrix_vals = tup[:-n]
+    matrix = np.array(matrix_vals).reshape(n, n)
+    ops = [op_dict[t] for t in tup[-n:]]
+
+    return {"matrix": matrix, "ops": ops}
+
+
+def pad_spec(spec):
+    matrix_dim = len(spec['matrix'])
+    if matrix_dim < 7:
+        padval = 7 - matrix_dim
+        spec['matrix'] = np.pad(spec['matrix'], [(0, padval), (0, padval)])
+        for _ in range(padval):
+            spec['ops'].insert(-1, 'maxpool3x3')
+    return spec

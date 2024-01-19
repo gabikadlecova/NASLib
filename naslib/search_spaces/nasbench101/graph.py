@@ -11,7 +11,7 @@ from naslib.search_spaces.core.graph import Graph, EdgeData
 from naslib.search_spaces.core.primitives import AbstractPrimitive
 from naslib.search_spaces.core.query_metrics import Metric
 from naslib.search_spaces.nasbench101.conversions import convert_naslib_to_spec, \
-convert_spec_to_naslib, convert_spec_to_tuple
+    convert_spec_to_naslib, convert_spec_to_tuple, convert_tuple_to_spec, pad_spec
 
 from naslib.utils.utils import get_project_root
 
@@ -91,7 +91,7 @@ class NasBench101SearchSpace(Graph):
             scope="node",
             private_edge_data=True
         )
-        
+
         cell.update_edges(
             update_func=lambda current_edge_data: _set_cell_ops(current_edge_data, C=channels[0]),
             scope="cell",
@@ -107,7 +107,7 @@ class NasBench101SearchSpace(Graph):
         if dataset_api is None:
             raise NotImplementedError('Must pass in dataset_api to query nasbench101')
         assert epoch in [-1, 4, 12, 36, 108, None], 'nasbench101 does not have full learning curve information'
-    
+
         metric_to_nb101 = {
             Metric.TRAIN_ACCURACY: 'train_accuracy',
             Metric.VAL_ACCURACY: 'validation_accuracy',
@@ -154,6 +154,11 @@ class NasBench101SearchSpace(Graph):
         # TODO: convert the naslib object to this spec
         # convert_spec_to_naslib(spec, self)
         self.spec = spec
+
+    def set_hash(self, hash):
+        spec = convert_tuple_to_spec(hash)
+        spec = pad_spec(spec)
+        self.set_spec(spec)
 
     def sample_random_architecture(self, dataset_api):
         """
