@@ -1,6 +1,8 @@
 import numpy as np
 import logging
 
+from naslib.search_spaces.nasbench101.conversions import pad_spec
+
 """
 These are the encoding methods for nasbench101.
 The plan is to unify encodings across all search spaces.
@@ -153,8 +155,8 @@ def encode_seminas(spec):
 
 
 def encode_101(arch, encoding_type='path'):
-    
     spec = arch.get_spec()
+    spec = pad_spec(spec)
 
     if encoding_type == 'path':
         return encode_paths(spec=spec)
