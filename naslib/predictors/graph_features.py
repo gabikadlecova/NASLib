@@ -55,7 +55,7 @@ class GraphFeaturesPredictor(Predictor):
 
     @property
     def inital_hyperparams(self):
-        if self.model == 'rf':
+        if self.model_name == 'rf':
             # NOTE: Copied from NB301
             params = {
                 "n_estimators": 116,
@@ -65,7 +65,7 @@ class GraphFeaturesPredictor(Predictor):
                 "bootstrap": False,
                 #'verbose': -1
             }
-        elif self.model == 'xgb':
+        elif self.model_name == 'xgb':
             params = {
                 'objective': 'reg:squarederror',
                 'eval_metric': "rmse",
@@ -86,7 +86,7 @@ class GraphFeaturesPredictor(Predictor):
             # evaluate the default config first during HPO
             params = self.inital_hyperparams.copy()
         else:
-            if self.model == 'rf':
+            if self.model_name == 'rf':
                 params = {
                     "n_estimators": int(loguniform(16, 128)),
                     "max_features": loguniform(0.1, 0.9),
@@ -95,7 +95,7 @@ class GraphFeaturesPredictor(Predictor):
                     "bootstrap": False,
                     #'verbose': -1
                 }
-            elif self.model == 'xgb':
+            elif self.model_name == 'xgb':
                 params = {
                     'objective': 'reg:squarederror',
                     'eval_metric': "rmse",

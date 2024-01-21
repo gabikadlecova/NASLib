@@ -65,7 +65,7 @@ class DartsSearchSpace(Graph):
 
         self.channels = [16, 32, 64]
         self.compact = None
-        self.load_labeled = None
+        self.load_labeled = True
         self.num_classes = self.NUM_CLASSES if hasattr(self, 'NUM_CLASSES') else 10
         self.max_epoch = 97
         self.space_name = 'darts'
