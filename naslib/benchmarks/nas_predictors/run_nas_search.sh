@@ -1,7 +1,8 @@
 optimizer=$5
 
 predictors=(bananas mlp lgb gcn xgb ngb rf dngo \
-bohamiann bayes_lin_reg seminas nao gp sparse_gp var_sparse_gp)
+bohamiann bayes_lin_reg seminas nao gp sparse_gp var_sparse_gp
+graph_features graph_features_xgb graph_features_xgb_params)
 
 start_seed=$1
 if [ -z "$start_seed" ]
@@ -9,13 +10,13 @@ then
     start_seed=0
 fi
 
-# folders:
-outdir=search_nb101_$optimizer
-
 # search space / data:
 search_space=$6
 dataset=$7
 search_epochs=500
+
+# folders:
+out_dir=search_"$search_space"_$optimizer
 
 # trials / seeds:
 trials=$4
