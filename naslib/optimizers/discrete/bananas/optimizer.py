@@ -1,5 +1,8 @@
 import collections
 import logging
+import random
+
+import pandas as pd
 import torch
 import copy
 import numpy as np
@@ -45,6 +48,15 @@ class Bananas(MetaOptimizer):
         self.num_candidates = config.search.num_candidates
         self.max_zerocost = 1000
 
+        self.sample_from_valids = False
+        if hasattr(config, 'sample_from_valids') and config.sample_from_valids is not None:
+            self.sample_from_valids = config.sample_from_valids
+
+        self.valid_networks = None
+        if hasattr(config, 'valid_networks') and config.valid_networks is not None:
+            self.valid_networks = pd.read_csv(config.valid_networks)['net'].tolist()
+            self.valid_networks = self.valid_networks if self.sample_from_valids else set(self.valid_networks)
+
         self.train_data = []
         self.next_batch = []
         self.history = torch.nn.ModuleList()
@@ -70,13 +82,24 @@ class Bananas(MetaOptimizer):
         else:
             return ZeroCostV1(self.config, batch_size=64, method_type='jacov')    
 
+    def sample_valid_arch(self):
+        arch = self.search_space.clone()
+        arch_hash = random.choice(self.valid_networks)
+        arch.set_hash(eval(arch_hash))
+        return arch
+
     def new_epoch(self, epoch):
 
         if epoch < self.num_init:
             # randomly sample initial architectures 
             model = torch.nn.Module()   # hacky way to get arch and accuracy checkpointable
-            model.arch = self.search_space.clone()
-            model.arch.sample_random_architecture(dataset_api=self.dataset_api)
+
+            if self.sample_from_valids:
+                model.arch = self.sample_valid_arch()
+            else:
+                model.arch = self.search_space.clone()
+                model.arch.sample_random_architecture(dataset_api=self.dataset_api)
+
             model.accuracy = model.arch.query(self.performance_metric, self.dataset, dataset_api=self.dataset_api)
             if self.zc and len(self.train_data) <= self.max_zerocost:                
                 zc_method = self.get_zc_method()
@@ -106,8 +129,13 @@ class Bananas(MetaOptimizer):
                     # create unlabeled data and pass it to the predictor
                     while len(self.unlabeled) < len(xtrain):
                         model = torch.nn.Module()
-                        model.arch = self.search_space.clone()
-                        model.arch.sample_random_architecture(dataset_api=self.dataset_api)
+
+                        if self.sample_from_valids:
+                            model.arch = self.sample_valid_arch()
+                        else:
+                            model.arch = self.search_space.clone()
+                            model.arch.sample_random_architecture(dataset_api=self.dataset_api)
+
                         if self.zc and len(self.train_data) <= self.max_zerocost:
                             zc_method = self.get_zc_method()
                             zc_method.train_loader = copy.deepcopy(self.train_loader)
@@ -134,8 +162,11 @@ class Bananas(MetaOptimizer):
                 if self.acq_fn_optimization == 'random_sampling':
 
                     for _ in range(self.num_candidates):
-                        arch = self.search_space.clone()
-                        arch.sample_random_architecture(dataset_api=self.dataset_api)
+                        if self.sample_from_valids:
+                            arch = self.sample_valid_arch()
+                        else:
+                            arch = self.search_space.clone()
+                            arch.sample_random_architecture(dataset_api=self.dataset_api)
                         candidates.append(arch)
                     
                 elif self.acq_fn_optimization == 'mutation':

@@ -145,8 +145,8 @@ def main(args):
                            'acq_fn_type': 'its',
                            'acq_fn_optimization': 'random_sampling',
                            'encoding_type': 'adjacency_one_hot',
-                           'num_arches_to_mutate': 5,
-                           'max_mutations': 1,
+                           #'num_arches_to_mutate': 5,
+                           #'max_mutations': 1,
                            'num_candidates': 200,
                            'batch_size': 256,
                            'data_size': 25000,
@@ -156,6 +156,11 @@ def main(args):
                            'train_portion': 0.7
                           }
             }
+
+            config["graph_features_model"] = args.graph_features_model
+            config["graph_features_pickle_path"] = args.graph_features_pickle_path
+            config["valid_networks"] = args.valid_networks
+            config["sample_from_valids"] = args.search_space in ['nasbench101', 'darts']
 
             path = folder + f'/config_{args.optimizer}_{args.predictor}_{i}.yaml'
             with open(path, 'w') as fh:

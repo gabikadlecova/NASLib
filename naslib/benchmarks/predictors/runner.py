@@ -45,6 +45,7 @@ supported_predictors = {
     "graph_features_tune": GraphFeaturesPredictor(config, hpo_wrapper=True),
     "graph_features_xgb": GraphFeaturesPredictor(config, model='xgb'),
     "graph_features_xgb_tune": GraphFeaturesPredictor(config, model='xgb', hpo_wrapper=True),
+    "graph_features_xgb_params": GraphFeaturesPredictor(config, model='xgb_params'),
     'grasp': ZeroCostV2(config, batch_size=64, method_type='grasp'),
     'jacov': ZeroCostV1(config, batch_size=64, method_type='jacov'),
     'lce': LCEPredictor(metric=Metric.VAL_ACCURACY),

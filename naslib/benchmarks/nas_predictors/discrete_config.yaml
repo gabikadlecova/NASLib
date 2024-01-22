@@ -1,8 +1,13 @@
 seed: 0
-optimizer: bananas
-search_space: nasbench201
+optimizer: rs
+search_space: nasbench101
 dataset: cifar10
-out_dir: run
+out_dir: run_search
+
+sample_from_valids: True
+graph_features_pickle_path: "../../../../../zc_combine/data/nasbench101-cifar10.pickle"
+graph_features_model: rf
+valid_networks: "../../../../../zc_combine/data/nb101_nets.csv"
 
 search:
   seed: 0
@@ -10,7 +15,7 @@ search:
   epochs: 100
   fidelity: -1
 
-  predictor_type: var_sparse_gp
+  predictor_type: graph_features_xgb_params
   num_init: 10  
   k: 10
 

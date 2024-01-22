@@ -1,6 +1,8 @@
 import numpy as np
 import copy
 
+from naslib.predictors.graph_features import GraphFeaturesPredictor
+
 from naslib.predictors.predictor import Predictor
 from naslib.predictors.mlp import MLPPredictor
 from naslib.predictors.trees import LGBoost, \
@@ -72,7 +74,10 @@ class Ensemble(Predictor):
                                                   num_steps=200, zc=False),
             'xgb': XGBoost(ss_type=self.ss_type, zc=False,
                            encoding_type='adjacency_one_hot'),
-            'omni_ngb': OmniNGBPredictor(zero_cost=['jacov'], lce=[], encoding_type='adjacency_one_hot', 
+            "graph_features": GraphFeaturesPredictor(self.config, ss_type=self.ss_type),
+            "graph_features_xgb": GraphFeaturesPredictor(self.config, ss_type=self.ss_type, model='xgb'),
+            "graph_features_xgb_params": GraphFeaturesPredictor(self.config, ss_type=self.ss_type, model='xgb_params'),
+            'omni_ngb': OmniNGBPredictor(zero_cost=['jacov'], lce=[], encoding_type='adjacency_one_hot',
                                       ss_type=self.ss_type, run_pre_compute=False, n_hypers=25, 
                                       min_train_size=0, max_zerocost=100),
             'omni_seminas': OmniSemiNASPredictor(zero_cost=['jacov'], lce=[], encoding_type='seminas', 

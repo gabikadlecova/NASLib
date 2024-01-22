@@ -1,4 +1,7 @@
+import random
+
 import numpy as np
+import pandas as pd
 import torch
 
 from naslib.optimizers.core.metaclasses import MetaOptimizer
@@ -35,10 +38,23 @@ class RandomSearch(MetaOptimizer):
         self.dataset = config.dataset
         self.fidelity = config.search.fidelity
 
+        self.sample_from_valids = False
+        if hasattr(config, 'sample_from_valids') and config.sample_from_valids is not None:
+            self.sample_from_valids = config.sample_from_valids
+
+        self.valid_networks = None
+        if hasattr(config, 'valid_networks') and config.valid_networks is not None:
+            self.valid_networks = pd.read_csv(config.valid_networks)['net'].tolist()
+            self.valid_networks = self.valid_networks if self.sample_from_valids else set(self.valid_networks)
         
         self.sampled_archs = []
         self.history = torch.nn.ModuleList()
 
+    def sample_valid_arch(self):
+        arch = self.search_space.clone()
+        arch_hash = random.choice(self.valid_networks)
+        arch.set_hash(eval(arch_hash))
+        return arch
 
     def adapt_search_space(self, search_space, scope=None, dataset_api=None):
         assert search_space.QUERYABLE, "Random search is currently only implemented for benchmarks."
@@ -53,7 +69,13 @@ class RandomSearch(MetaOptimizer):
 
         model = torch.nn.Module()   # hacky way to get arch and accuracy checkpointable
         model.arch = self.search_space.clone()
-        model.arch.sample_random_architecture(dataset_api=self.dataset_api)        
+
+        if self.sample_from_valids:
+            model.arch = self.sample_valid_arch()
+        else:
+            model.arch = self.search_space.clone()
+            model.arch.sample_random_architecture(dataset_api=self.dataset_api)
+
         model.accuracy = model.arch.query(self.performance_metric, 
                                           self.dataset, 
                                           epoch=self.fidelity, 
@@ -91,7 +113,8 @@ class RandomSearch(MetaOptimizer):
         return (
             best_arch.query(Metric.TRAIN_ACCURACY, self.dataset, dataset_api=self.dataset_api), 
             best_arch.query(Metric.VAL_ACCURACY, self.dataset, dataset_api=self.dataset_api), 
-            best_arch.query(Metric.TEST_ACCURACY, self.dataset, dataset_api=self.dataset_api), 
+            best_arch.query(Metric.TEST_ACCURACY, self.dataset, dataset_api=self.dataset_api),
+            best_arch.query(Metric.TRAIN_TIME, self.dataset, dataset_api=self.dataset_api),
         )
     
     def test_statistics(self):

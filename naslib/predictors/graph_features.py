@@ -15,8 +15,8 @@ def replace_path_root(cfg_dict, root_path, root_str="<ROOT>"):
 
 
 class GraphFeaturesPredictor(Predictor):
-    def __init__(self, config, model='rf', hpo_wrapper=False):
-        super().__init__()
+    def __init__(self, config, model='rf', hpo_wrapper=False, **kwargs):
+        super().__init__(**kwargs)
 
         feature_path = config.graph_features_pickle_path
         with open(feature_path, 'rb') as f:
@@ -25,8 +25,19 @@ class GraphFeaturesPredictor(Predictor):
 
         self.dataset.drop(columns='net', inplace=True)
 
-        self.model_name = model
-        self.model = predictor_cls[model](config.seed)
+        self.model_name = model if model != 'xgb_params' else 'xgb'
+
+        model_args = {}
+        if self.model_name == 'xgb_params':
+            # good hyperparams chosen by hand
+            model_args = {
+                "tree_method": "hist",
+                "subsample": 0.9,
+                "n_estimators": 10000,
+                "learning_rate": 0.01
+            }
+
+        self.model = predictor_cls[self.model_name](config.seed, **model_args)
         self.bench_name = f"zc_{config.search_space}"
 
         self.hpo_wrapper = hpo_wrapper

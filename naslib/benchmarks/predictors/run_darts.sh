@@ -5,7 +5,7 @@ bananas bonas gcn mlp nao seminas \
 lgb ngb rf xgb \
 bayes_lin_reg bohamiann dngo \
 gp sparse_gp var_sparse_gp \
-graph_features graph_features_xgb graph_features_tune graph_features_xgb_tune)
+graph_features graph_features_xgb graph_features_tune graph_features_xgb_tune graph_features_xgb_params)
 
 experiment_types=(single single single single single single \
 vary_fidelity vary_fidelity vary_fidelity vary_fidelity vary_fidelity vary_fidelity \
@@ -14,7 +14,7 @@ vary_train_size vary_train_size vary_train_size vary_train_size vary_train_size 
 vary_train_size vary_train_size vary_train_size vary_train_size \
 vary_train_size vary_train_size vary_train_size \
 vary_train_size vary_train_size vary_train_size \
-vary_train_size vary_train_size vary_train_size vary_train_size)
+vary_train_size vary_train_size vary_train_size vary_train_size vary_train_size)
 
 start_seed=$1
 if [ -z "$start_seed" ]
