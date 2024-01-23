@@ -133,6 +133,7 @@ def main(args):
                 'dataset': args.dataset,
                 'optimizer': args.optimizer,
                 'out_dir': args.out_dir,
+                'is_search': True,
                 'search': {'predictor_type': args.predictor,
                            'epochs': args.epochs,
                            'checkpoint_freq': args.checkpoint_freq,
@@ -160,7 +161,7 @@ def main(args):
             config["graph_features_model"] = args.graph_features_model
             config["graph_features_pickle_path"] = args.graph_features_pickle_path
             config["valid_networks"] = args.valid_networks
-            config["sample_from_valids"] = args.search_space in ['nasbench101', 'darts']
+            config["sample_from_valids"] = True # args.search_space in ['nasbench101', 'darts']
 
             path = folder + f'/config_{args.optimizer}_{args.predictor}_{i}.yaml'
             with open(path, 'w') as fh:

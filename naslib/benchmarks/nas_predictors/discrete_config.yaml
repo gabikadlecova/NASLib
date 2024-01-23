@@ -9,6 +9,8 @@ graph_features_pickle_path: "../../../../../zc_combine/data/nasbench101-cifar10.
 graph_features_model: rf
 valid_networks: "../../../../../zc_combine/data/nb101_nets.csv"
 
+is_search: True
+
 search:
   seed: 0
   checkpoint_freq: 1000

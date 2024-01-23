@@ -27,9 +27,9 @@ for i in $(seq 0 $((${#predictors[@]}-1)) )
 do
     predictor=${predictors[$i]}
     if [[ $8 ]]; then
-         if [ $predictor != $8 ]; then
-             continue;
-         fi
+        if [ $predictor != $8 ]; then
+            continue;
+        fi
     fi
 
     graph_pred_args="--graph_features_pickle_path $2 --valid_networks $3"
@@ -46,6 +46,11 @@ for t in $(seq $start_seed $end_seed)
 do
     for predictor in ${predictors[@]}
     do
+        if [[ $8 ]]; then
+            if [ $predictor != $8 ]; then
+                continue;
+            fi
+        fi
         config_file=$out_dir/$dataset/configs/nas_predictors/config\_$optimizer\_$predictor\_$t.yaml
         echo ================running $predictor trial: $t =====================
         python nas_predictors/runner.py --config-file $config_file

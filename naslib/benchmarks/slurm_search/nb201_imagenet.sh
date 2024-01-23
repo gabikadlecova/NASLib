@@ -33,7 +33,7 @@ start=`date +%s`
 BASE_DIR="/home/kadlecog/kadlecog-kadlecog-features/predictors_NASLib/naslib/benchmarks"
 
 # $1 ... start seed, $2 ... num runs, $3 ... optimizer, $4 ... predictor
-bash $BASE_DIR/nas_predictors/run_nas_search.sh $1 $BASE_DIR/saved_features/nasbench201-cifar10.pickle \
+bash $BASE_DIR/nas_predictors/run_nas_search.sh $1 $BASE_DIR/saved_features/nasbench201-ImageNet16-120.pickle \
     $BASE_DIR/../../../zc_combine/data/nb201_valid_nets.csv $2 $3 nasbench201 ImageNet16-120 $4
 
 

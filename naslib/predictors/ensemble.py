@@ -74,9 +74,6 @@ class Ensemble(Predictor):
                                                   num_steps=200, zc=False),
             'xgb': XGBoost(ss_type=self.ss_type, zc=False,
                            encoding_type='adjacency_one_hot'),
-            "graph_features": GraphFeaturesPredictor(self.config, ss_type=self.ss_type),
-            "graph_features_xgb": GraphFeaturesPredictor(self.config, ss_type=self.ss_type, model='xgb'),
-            "graph_features_xgb_params": GraphFeaturesPredictor(self.config, ss_type=self.ss_type, model='xgb_params'),
             'omni_ngb': OmniNGBPredictor(zero_cost=['jacov'], lce=[], encoding_type='adjacency_one_hot',
                                       ss_type=self.ss_type, run_pre_compute=False, n_hypers=25, 
                                       min_train_size=0, max_zerocost=100),
@@ -84,6 +81,12 @@ class Ensemble(Predictor):
                                                  ss_type=self.ss_type, run_pre_compute=False, semi=True,
                                                  max_zerocost=1000, config=self.config),
         }
+
+        if hasattr(self.config, 'is_search') and self.config.is_search: 
+            trainable_predictors["graph_features"] = GraphFeaturesPredictor(self.config, ss_type=self.ss_type)
+            trainable_predictors["graph_features_xgb"] = GraphFeaturesPredictor(self.config, ss_type=self.ss_type,
+                    model='xgb')
+            trainable_predictors["graph_features_xgb_params"] = GraphFeaturesPredictor(self.config, ss_type=self.ss_type, model='xgb_params')
 
         return [copy.deepcopy(trainable_predictors[self.predictor_type]) for _ in range(self.num_ensemble)]
 

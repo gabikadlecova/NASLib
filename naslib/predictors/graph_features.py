@@ -28,7 +28,7 @@ class GraphFeaturesPredictor(Predictor):
         self.model_name = model if model != 'xgb_params' else 'xgb'
 
         model_args = {}
-        if self.model_name == 'xgb_params':
+        if model == 'xgb_params':
             # good hyperparams chosen by hand
             model_args = {
                 "tree_method": "hist",
