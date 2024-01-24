@@ -328,6 +328,8 @@ class DartsSearchSpace(Graph):
             elif metric == Metric.HP:
                 # todo: compute flops/params/latency for each arch
                 return {'flops': 15, 'params': 0.1, 'latency': 0.01}
+            elif metric == Metric.RAW:
+                return query_results
             elif full_lc and epoch == -1:
                 return query_results[metric_to_nb301[metric]]
             elif full_lc and epoch != -1:
