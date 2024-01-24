@@ -110,12 +110,15 @@ class RandomSearch(MetaOptimizer):
 
     def train_statistics(self):
         best_arch = self.get_final_architecture()
-        return (
-            best_arch.query(Metric.TRAIN_ACCURACY, self.dataset, dataset_api=self.dataset_api), 
-            best_arch.query(Metric.VAL_ACCURACY, self.dataset, dataset_api=self.dataset_api), 
-            best_arch.query(Metric.TEST_ACCURACY, self.dataset, dataset_api=self.dataset_api),
-            best_arch.query(Metric.TRAIN_TIME, self.dataset, dataset_api=self.dataset_api),
-        )
+
+        metrics = []
+        for metric in [Metric.TRAIN_ACCURACY, Metric.VAL_ACCURACY, Metric.TEST_ACCURACY, Metric.TRAIN_TIME]:
+            try:
+                res = best_arch.query(metric, self.dataset, dataset_api=self.dataset_api)
+            except AssertionError:
+                res = -1
+            metrics.append(res)
+        return tuple(metrics)
     
     def test_statistics(self):
         best_arch = self.get_final_architecture()
