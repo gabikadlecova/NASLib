@@ -320,7 +320,7 @@ class DartsSearchSpace(Graph):
             and we can query the train loss or val accuracy at a specific epoch
             (also, querying will give 'real' answers, since these arches were actually trained)
             """
-            assert metric in [Metric.VAL_ACCURACY, Metric.TRAIN_LOSS, Metric.TRAIN_TIME, Metric.HP]
+            assert metric in [Metric.VAL_ACCURACY, Metric.TRAIN_LOSS, Metric.TRAIN_TIME, Metric.HP, Metric.RAW]
             query_results = dataset_api['nb301_data'][self.compact]
 
             if metric == Metric.TRAIN_TIME:
