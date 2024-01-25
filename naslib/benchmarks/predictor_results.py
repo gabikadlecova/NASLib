@@ -29,7 +29,12 @@ def main(out_csv, runs_dir, dataset_values):
         predictor = predictor_dir.split('/')[-1]
 
         for seed in os.listdir(predictor_dir):
-            with open(f"{predictor_dir}/{seed}/errors.json", 'r') as f:
+            errors_path = f"{predictor_dir}/{seed}/errors.json"
+            if not os.path.exists(errors_path):
+                print(f"File {errors_path} does not exist, skipping.")
+                continue
+
+            with open(errors_path, 'r') as f:
                  data = json.load(f)
 
             for entry in data[1:]:
