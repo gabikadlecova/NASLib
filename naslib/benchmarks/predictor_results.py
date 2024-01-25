@@ -25,7 +25,7 @@ def main(out_csv, runs_dir, dataset_values):
 
     results = []
 
-    for predictor_dir in glob.glob(f"{runs_dir}/*/"):
+    for predictor_dir in glob.glob(f"{runs_dir}/*"):
         predictor = predictor_dir.split('/')[-1]
 
         for seed in os.listdir(predictor_dir):
