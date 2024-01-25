@@ -70,8 +70,8 @@ def pad_spec(spec):
 
         padval = 7 - matrix_dim
         spec['matrix'] = np.pad(spec['matrix'], [(0, padval), (0, padval)])
-        spec['matrix'][:, -1] = spec['matrix'][:, -2]
-        spec['matrix'][:, -2] = 0
+        spec['matrix'][:, -1] = spec['matrix'][:, -(padval + 1)]
+        spec['matrix'][:, -(padval + 1)] = 0
         for _ in range(padval):
             spec['ops'].insert(-1, 'maxpool3x3')
     return spec
