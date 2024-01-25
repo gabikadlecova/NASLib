@@ -8,7 +8,7 @@ import pandas as pd
 
 @click.command()
 @click.argument('out_csv')
-@click.argument('runs_dir', help='Path to the directory with runs. Example: "runs/cifar10/predictors/".')
+@click.argument('runs_dir')
 @click.option('--dataset_values', default='cifar10,ImageNet16-120', help="Possible dataset subdirs.")
 def main(out_csv, runs_dir, dataset_values):
     if os.path.exists(out_csv):
