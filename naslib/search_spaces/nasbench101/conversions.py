@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 """
 'naslib': the NASBench101SearchSpace object
@@ -64,8 +66,12 @@ def convert_tuple_to_spec(tup):
 def pad_spec(spec):
     matrix_dim = len(spec['matrix'])
     if matrix_dim < 7:
+        spec = deepcopy(spec)
+
         padval = 7 - matrix_dim
         spec['matrix'] = np.pad(spec['matrix'], [(0, padval), (0, padval)])
+        spec['matrix'][:, -1] = spec['matrix'][:, -2]
+        spec['matrix'][:, -2] = 0
         for _ in range(padval):
             spec['ops'].insert(-1, 'maxpool3x3')
     return spec
