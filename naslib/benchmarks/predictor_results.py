@@ -10,7 +10,8 @@ import pandas as pd
 @click.argument('out_csv')
 @click.argument('runs_dir')
 @click.option('--dataset_values', default='cifar10,ImageNet16-120', help="Possible dataset subdirs.")
-def main(out_csv, runs_dir, dataset_values):
+@click.option('--benchmark', default=None, help="Optionally additional benchmark column added.")
+def main(out_csv, runs_dir, dataset_values, benchmark):
     if os.path.exists(out_csv):
         print(f"File {out_csv} already exists. Do you want to overwrite it? (y/n)")
         ans = input()
@@ -41,7 +42,7 @@ def main(out_csv, runs_dir, dataset_values):
                 res = {'predictor': predictor, 'seed': seed, 'dataset': dataset, 'train_size': entry['train_size']}
                 metrics = {k: entry[k] for k in ['kendalltau', 'spearman', 'train_time', 'fit_time']}
 
-                results.append({**res, **metrics})
+                results.append({**res, **metrics} if benchmark is not None else {**{'benchmark': benchmark}, **res, **metrics})
 
     df = pd.DataFrame(results)
     df.to_csv(out_csv, index=False)
