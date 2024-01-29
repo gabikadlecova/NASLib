@@ -38,14 +38,16 @@ def main(out_csv, runs_dir, dataset_values, benchmark):
             with open(errors_path, 'r') as f:
                  data = json.load(f)
 
+            i = 0
             total_runtime, total_train_time = 0, 0
             best_acc = data[1]['valid_acc'][0]
             for valaccs, runtime, traintime in zip(*[data[1][k] for k in ['valid_acc', 'runtime', 'train_time']]):
                 res = {'predictor': predictor, 'seed': seed, 'dataset': dataset}
                 metrics = {
-                    'valid_acc': valaccs,
-                    'runtime': runtime,
-                    'train_time': traintime
+                    'valid_acc_step': valaccs,
+                    'runtime_step': runtime,
+                    'train_time_step': traintime,
+                    'step': i
                 }
 
                 # best encountered val acc
@@ -58,6 +60,7 @@ def main(out_csv, runs_dir, dataset_values, benchmark):
                 total_train_time += traintime
                 metrics['runtime'] = total_runtime
                 metrics['train_time'] = total_train_time
+                i += 1
 
                 results.append({**res, **metrics} if benchmark is None else {**{'benchmark': benchmark}, **res, **metrics})
 
