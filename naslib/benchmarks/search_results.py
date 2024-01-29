@@ -39,19 +39,23 @@ def main(out_csv, runs_dir, dataset_values, benchmark):
                  data = json.load(f)
 
             total_runtime, total_train_time = 0, 0
-            best_acc = data[1][0]['valid_acc']
-            for entry in data[1]:
+            best_acc = data[1]['valid_acc'][0]
+            for valaccs, runtime, traintime in zip(*[data[1][k] for k in ['valid_acc', 'runtime', 'train_time']]):
                 res = {'predictor': predictor, 'seed': seed, 'dataset': dataset}
-                metrics = {f"{k}_step": entry[k] for k in ['valid_acc', 'runtime', 'train_time']}
+                metrics = {
+                    'valid_acc': valaccs,
+                    'runtime': runtime,
+                    'train_time': traintime
+                }
 
                 # best encountered val acc
-                if best_acc < entry['valid_acc']:
-                    best_acc = entry['valid_acc']
+                if best_acc < valaccs:
+                    best_acc = valaccs
                 metrics['valid_acc'] = best_acc
 
                 # cummulative runtimes
-                total_runtime += entry['runtime']
-                total_train_time += entry['train_time']
+                total_runtime += runtime
+                total_train_time += traintime
                 metrics['runtime'] = total_runtime
                 metrics['train_time'] = total_train_time
 
