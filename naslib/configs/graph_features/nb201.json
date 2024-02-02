@@ -1,0 +1,11 @@
+{
+  "model": "rf",
+  "searchspace_path": "<ROOT>/data/",
+  "cache_dir": "<ROOT>/scripts/cache_data/",
+  "kwargs": {
+    "use_all_proxies": true,
+    "cfg": "<ROOT>/zc_combine/configs/nb201_full.json",
+    "version_key":  "naslib_train"
+  }
+}
+
