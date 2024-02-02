@@ -25,12 +25,12 @@ echo "Running job $SLURM_JOB_NAME using $SLURM_JOB_CPUS_PER_NODE cpus per node w
 
 # Activate your environment
 # You can also comment out this line, and activate your environment in the login node before submitting the job
-source ~/kadlecog-pruning_project/miniconda3/bin/activate base # Adjust to your path of Miniconda installation
+source ~/miniconda3/bin/activate base # Adjust to your path of Miniconda installation
 conda activate naslib
 # Running the job
 start=`date +%s`
 
-BASE_DIR="/home/kadlecog/kadlecog-kadlecog-features/predictors_NASLib/naslib/benchmarks"
+BASE_DIR="."
 
 # $1 ... start seed, $2 ... num runs, $3 ... optimizer, $4 ... predictor
 bash $BASE_DIR/nas_predictors/run_nas_search.sh $1 $BASE_DIR/saved_features/nasbench101-cifar10.pickle \
