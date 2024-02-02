@@ -11,7 +11,6 @@
 #SBATCH --mem 32GB
 #SBATCH -c 8
 #SBATCH --mail-type=END,FAIL
-#SBATCH -p bosch_cpu-cascadelake 
 
 echo "Workingdir: $PWD";
 echo "Started at $(date)";
