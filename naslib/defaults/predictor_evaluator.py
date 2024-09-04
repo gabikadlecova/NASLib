@@ -10,8 +10,11 @@ from scipy import stats
 from sklearn import metrics
 import math
 
+from naslib.predictors.zerocost import ZeroCost
 from naslib.search_spaces.core.query_metrics import Metric
 from naslib.utils import generate_kfold, cross_validation
+
+from naslib import utils
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +50,9 @@ class PredictorEvaluator(object):
         self.num_arches_to_mutate = 5
         self.max_mutation_rate = 3
 
+        # For ZeroCost proxies
+        self.dataloader = None
+
     def adapt_search_space(
         self, search_space, load_labeled, scope=None, dataset_api=None
     ):
@@ -69,6 +75,9 @@ class PredictorEvaluator(object):
             raise NotImplementedError(
                 "This search space is not yet implemented in PredictorEvaluator."
             )
+
+        if isinstance(self.predictor, ZeroCost):
+            self.dataloader, _, _, _, _ = utils.get_train_val_loaders(self.config)
 
     def get_full_arch_info(self, arch):
         """
@@ -139,10 +148,8 @@ class PredictorEvaluator(object):
                 arch.load_labeled_architecture(dataset_api=self.dataset_api)
 
             arch_hash = arch.get_hash()
-            if False: # removing this for consistency, for now
-                continue
-            else:
-                arch_hash_map[arch_hash] = True
+
+            arch_hash_map[arch_hash] = True
 
             accuracy, train_time, info_dict = self.get_full_arch_info(arch)
             xdata.append(arch)
@@ -295,7 +302,11 @@ class PredictorEvaluator(object):
         hyperparams = self.predictor.get_hyperparams()
 
         fit_time_end = time.time()
-        test_pred = self.predictor.query(xtest, test_info)
+        if isinstance(self.predictor, ZeroCost):
+            [g.parse() for g in xtest] # parse the graphs because they will be used
+            test_pred = self.predictor.query_batch(xtest, self.dataloader)
+        else:
+            test_pred = self.predictor.query(xtest, test_info)
         query_time_end = time.time()
 
         # If the predictor is an ensemble, take the mean

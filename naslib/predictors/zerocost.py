@@ -4,6 +4,7 @@ synflow, grad_norm, fisher, and grasp, and variants of jacov and snip
 based on https://github.com/mohsaied/zero-cost-nas
 """
 import torch
+import numpy as np
 import logging
 import math
 
@@ -24,12 +25,21 @@ class ZeroCost(Predictor):
         self.num_imgs_or_batches = 1
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    def query(self, graph, dataloader=None, info=None):
+    def query_batch(self, graphs, dataloader):
+        scores = []
+
+        for graph in graphs:
+            score = self.query(graph, dataloader)
+            scores.append(score)
+
+        return np.array(scores)
+
+    def query(self, graph, dataloader):
         loss_fn = graph.get_loss_fn()
 
         n_classes = graph.num_classes
         score = predictive.find_measures(
-                net_orig=graph,
+                net_orig=graph.to(self.device),
                 dataloader=dataloader,
                 dataload_info=(self.dataload, self.num_imgs_or_batches, n_classes),
                 device=self.device,
